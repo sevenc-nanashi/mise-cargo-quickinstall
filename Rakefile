@@ -53,8 +53,8 @@ task :create_index do
         url: release.html_url,
         published_at: release.published_at,
         assets:
-          assets.transform_values do |v|
-            { **v, signature_url: sign_assets[v[:platform]] }
+          assets.map do |platform, v|
+            [platform, { **v, signature_url: sign_assets[platform] }]
           end
       }
       acc[package] ||= []

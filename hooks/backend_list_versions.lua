@@ -1,81 +1,49 @@
+local http = require("http")
+local json = require("json")
+local index = require("../lib/index")
+
 function PLUGIN:BackendListVersions(ctx)
-    local tool = ctx.tool
+  local tool = ctx.tool
 
-    -- Validate tool name
-    if not tool or tool == "" then
-        error("Tool name cannot be empty")
-    end
+  -- Validate tool name
+  if not tool or tool == "" then
+    error("Tool name cannot be empty")
+  end
 
-    -- Example implementations (choose/modify based on your backend):
+  local data = index.fetch_index()
+  if not data[tool] then
+    error("Tool not found: " .. tool)
+  end
 
-    -- Example 1: API-based version listing (like npm, pip, cargo)
-    local http = require("http")
-    local json = require("json")
-
-    -- Replace with your backend's API endpoint
-    local api_url = "https://index.crates.io/api/v1/crates/" .. tool
-
-    local resp, err = http.get({
-        url = api_url,
-        -- headers = { ["Authorization"] = "Bearer " .. token } -- if needed
-    })
-
-    if err then
-        error("Failed to fetch versions for " .. tool .. ": " .. err)
-    end
-
-    if resp.status_code ~= 200 then
-        error("API returned status " .. resp.status_code .. " for " .. tool)
-    end
-
-    local data = json.decode(resp.body)
-    local versions = {}
-
-    -- Parse versions from API response (adjust based on your API structure)
-    if data.versions then
-        for _, version in ipairs(data.versions) do
-            table.insert(versions, version)
+  local versions = {}
+  local targets = index.available_targets()
+  if data[tool] then
+    for version in pairs(data[tool]) do
+      for _, want_target in ipairs(targets) do
+        if data[tool][version]["assets"][want_target] then
+          table.insert(versions, data[tool][version]["version"])
+          break
         end
+      end
     end
+  end
 
-    -- Example 2: Command-line based version listing
-    --[[
-    local cmd = require("cmd")
+  if #versions == 0 then
+    error("No versions found for " .. tool)
+  end
 
-    -- Replace with your backend's command to list versions
-    local command = "<BACKEND> search " .. tool .. " --versions"
-    local result = cmd.exec(command)
-
-    if not result or result:match("error") then
-        error("Failed to fetch versions for " .. tool)
+  table.sort(versions, function(a, b)
+    for _i = 1, math.max(#a, #b) do
+      local a_part = tonumber(a:match("^(%d+)") or "0")
+      local b_part = tonumber(b:match("^(%d+)") or "0")
+      if a_part ~= b_part then
+        return a_part < b_part
+      end
+      a = a:sub(#tostring(a_part) + 2)
+      b = b:sub(#tostring(b_part) + 2)
     end
+    return false
+  end)
 
-    local versions = {}
-    -- Parse command output to extract versions
-    for version in result:gmatch("[%d%.]+[%w%-]*") do
-        table.insert(versions, version)
-    end
-    --]]
-
-    -- Example 3: Registry file parsing
-    --[[
-    local file = require("file")
-
-    -- Replace with path to your backend's registry or manifest
-    local registry_path = "/path/to/<BACKEND>/registry/" .. tool .. ".json"
-
-    if not file.exists(registry_path) then
-        error("Tool " .. tool .. " not found in registry")
-    end
-
-    local content = file.read(registry_path)
-    local data = json.decode(content)
-    local versions = data.versions or {}
-    --]]
-
-    if #versions == 0 then
-        error("No versions found for " .. tool)
-    end
-
-    return { versions = versions }
+  return { versions = versions }
 end
