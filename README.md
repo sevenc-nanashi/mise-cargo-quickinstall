@@ -7,6 +7,13 @@
 > Prefer `github` backend whenever possible, as it is more reliable.
 > cargo-quickinstall usually removes old versions so some versions of binary you want to install may not be available.
 
+## Installation
+
+```bash
+mise plugin install cago-quickinstall https://github.com/sevenc-nanashi/mise-cargo-quickinstall
+mise use cargo-quickinstall:cargo-insta
+```
+
 ## License
 
 MIT
