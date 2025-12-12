@@ -10,7 +10,7 @@
 ## Installation
 
 ```bash
-mise plugin install cago-quickinstall https://github.com/sevenc-nanashi/mise-cargo-quickinstall
+mise plugin install cargo-quickinstall https://github.com/sevenc-nanashi/mise-cargo-quickinstall
 mise use cargo-quickinstall:cargo-insta
 ```
 
