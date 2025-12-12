@@ -1,7 +1,3 @@
--- hooks/backend_list_versions.lua
--- Lists available versions for a tool in this backend
--- Documentation: https://mise.jdx.dev/backend-plugin-development.html#backendlistversions
-
 function PLUGIN:BackendListVersions(ctx)
     local tool = ctx.tool
 
@@ -17,7 +13,7 @@ function PLUGIN:BackendListVersions(ctx)
     local json = require("json")
 
     -- Replace with your backend's API endpoint
-    local api_url = "https://api.<BACKEND>.org/packages/" .. tool .. "/versions"
+    local api_url = "https://index.crates.io/api/v1/crates/" .. tool
 
     local resp, err = http.get({
         url = api_url,

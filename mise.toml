@@ -6,6 +6,7 @@ actionlint = "latest"
 hk = "latest"
 lua = "5.4"
 pkl = "latest"
+ruby = "latest"
 stylua = "latest"
 
 [tasks.format]
